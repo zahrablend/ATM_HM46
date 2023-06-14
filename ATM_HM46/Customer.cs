@@ -2,44 +2,34 @@
 {
     public class Customer
     {
+        public string Id { get; private set; }
         public string Name { get; private set; }
         public string Surname { get; private set; }
-        private int Pin { get; set; }
-        private List<Account> Accounts { get; set; }
+        private int _pin;
+        private List<Account> _accounts;
 
-        public Customer(string name, string surname, int pin, List<Account> accounts)
+        public Customer(string id, string name, string surname, int pin, List<Account> accounts)
         {
+            Id  =id;
             Name = name;
             Surname = surname;
-            Pin = pin;
-            Accounts = accounts;
+            _pin = pin;
+            _accounts = accounts;
         }
 
         public bool CheckPin(int pin)
         {
-            return Pin == pin;
+            return _pin == pin;
         }
 
-        public List<string> GetAccountNumbers()
+        public IEnumerable<string> GetAccountNumbers()
         {
-            var accountNumbers = new List<string>();
-            foreach (var account in Accounts)
-            {
-                accountNumbers.Add(account.AccountNumber);
-            }
-            return accountNumbers;
+            return _accounts.Select(a => a.AccountNumber);
         }
 
         public Account? GetAccount(string accountNumber)
         {
-            foreach (var account in Accounts)
-            {
-                if (account.AccountNumber == accountNumber)
-                {
-                    return account;
-                }
-            }
-            return null;
+            return _accounts.SingleOrDefault(a => a.AccountNumber == accountNumber);
         }
     }
 }

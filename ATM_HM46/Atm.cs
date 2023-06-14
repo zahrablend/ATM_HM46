@@ -5,20 +5,26 @@ namespace ATM_HM46
 {
     public class Atm
     {
-        private List<Customer> Customers { get; set; }
-        private Customer CurrentCustomer { get; set; }
-        private Account CurrentAccount { get; set; }
+        private List<Customer> _customers;
+        private Customer? _currentCustomer;
+        private Account? _currentAccount;
 
         public Atm(List<Customer> customers)
         {
-            Customers = customers;
+            _customers = customers;
         }
 
-        public bool Authorize(int pin)
+        public bool Authorize(string customerId, int pin)
         {
-            foreach (var customer in Customers.Where(customer => customer.CheckPin(pin)))
+            var customer = _customers.FirstOrDefault(c => c.Id == customerId);
+            if (customer == null)
             {
-                CurrentCustomer = customer;
+                return false;
+            }
+
+            if (customer.CheckPin(pin))
+            {
+                _currentCustomer = customer;
                 return true;
             }
 
@@ -27,30 +33,57 @@ namespace ATM_HM46
 
         public string? GetCurrentCustomerName()
         {
-            return CurrentCustomer.Name;
+            if (_currentCustomer != null)
+            {
+                return _currentCustomer.Name;
+            }
+
+            return string.Empty;
         }
 
-        public List<string>? GetAccountNumbers()
+        public IEnumerable<string>? GetAccountNumbers()
         { 
-            return CurrentCustomer.GetAccountNumbers();
+            return _currentCustomer?.GetAccountNumbers();
         }
 
         public bool SelectAccount(string accountNumber)
         {
-            var account = CurrentCustomer.GetAccount(accountNumber);
+            var account = _currentCustomer?.GetAccount(accountNumber);
 
-            CurrentAccount = account;
+            _currentAccount = account;
             return true;
         }
 
         public double GetBalance()
         {
-            return CurrentAccount.Balance;
+            if (CheckCurrentAccount())
+            {
+                return _currentAccount.Balance;
+            }
+
+            return 0;
         }
 
-        public bool Withdraw(double amount)
+        public WithdrawResultEnum Withdraw(double amount)
         {
-            return CurrentAccount.Withdraw(amount);
+            if (_currentAccount == null)
+            {
+                return WithdrawResultEnum.CustomerAccountNotSet;
+            }
+
+            var result = _currentAccount.Withdraw(amount);
+
+            return result ? WithdrawResultEnum.Success : WithdrawResultEnum.NotEnoughtMoney;
+        }
+
+        private bool CheckCurrentAccount()
+        {
+            return _currentAccount != null;
+        }
+
+        private bool CheckCurrentCustomer()
+        {
+            return _currentCustomer != null;
         }
     }
 }

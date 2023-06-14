@@ -18,17 +18,21 @@ namespace ATM_HM46
             var account2 = new Account("LV456456", 250);
             var account3 = new Account("LV789789", 3000);
 
-            var customer1 = new Customer("Zahra", "Zvirzdinaite", 1111, new List<Account> { account1 });
+            var customer1 = new Customer("1", "Zahra", "Zvirzdinaite", 1111, new List<Account> { account1 });
 
-            var customer2 = new Customer("Gusts", "Linkevics", 2222, new List<Account> { account2, account3 });
+            var customer2 = new Customer("2", "Gusts", "Linkevics", 2222, new List<Account> { account2, account3 });
 
             var atm = new Atm(new List<Customer> { customer1, customer2 });
 
             while (true)
             {
+                Console.WriteLine("Enter account id: ");
+                string? accountId = Console.ReadLine();
+
                 Console.WriteLine("Enter pin: ");
                 int pin = Convert.ToInt32(Console.ReadLine());
-                if (atm.Authorize(pin))
+
+                if (atm.Authorize(accountId, pin))
                 {
                     Console.WriteLine("Authorization successful. Welcome, " + atm.GetCurrentCustomerName());
                 }
@@ -40,18 +44,21 @@ namespace ATM_HM46
 
                 Console.WriteLine("Select account: ");
                 var accountNumbers = atm.GetAccountNumbers();
-                for (int i = 0; i < accountNumbers.Count; i++)
+
+                int i = 0;
+                foreach (var account in accountNumbers)
                 {
-                    Console.WriteLine(i + ": " + accountNumbers[i]);
+                    Console.WriteLine(i + ": " + account);
+                    ++i;
                 }
 
-                if (!int.TryParse(Console.ReadLine(), out int index) || index < 0 || index >= accountNumbers.Count)
+                if (!int.TryParse(Console.ReadLine(), out int index) || index < 0 || index >= accountNumbers.Count())
                 {
                     Console.WriteLine("Error: Invalid account selection");
                     continue;
                 }
 
-                string selectedAccountNumber = accountNumbers[index];
+                string selectedAccountNumber = accountNumbers.ToArray()[index];
                 if (atm.SelectAccount(selectedAccountNumber))
                 {
                     Console.WriteLine("Account selected: " + selectedAccountNumber);
@@ -66,22 +73,25 @@ namespace ATM_HM46
                 Console.WriteLine("Enter amount to withdraw: ");
                 double amount = Convert.ToDouble(Console.ReadLine());
 
-                if (atm.Withdraw(amount))
+                var withdrawResult = atm.Withdraw(amount);
+
+                switch (withdrawResult)
                 {
-                    balance = atm.GetBalance();
-                    if (balance.HasValue)
-                    {
-                        Console.WriteLine("Withdrawal successful. New balance: " + balance.Value);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Error: Insufficient funds");
+                    case WithdrawResultEnum.Success:
+                        balance = atm.GetBalance();
+                        Console.WriteLine("Withdrawal successful. New balance: " + balance);
+                        break;
+                    case WithdrawResultEnum.NotEnoughMoney:
+                        Console.WriteLine("Error: Insufficient funds");
+                        break;
+                    case WithdrawResultEnum.CustomerAccountNotSet:
+                        Console.WriteLine("Error: Account not set");
+                        break;
                 }
 
                 Console.WriteLine("Press X to exit or S to select another operation");
-                string input = Console.ReadLine();
-                if (input.ToUpper() == "X")
+                string? input = Console.ReadLine();
+                if (input?.ToUpper() == "X")
                 {
                     break;
                 }

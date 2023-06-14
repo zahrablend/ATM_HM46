@@ -5,7 +5,7 @@ namespace ATM_HM46
 {
     public class Atm
     {
-        private List<Customer> _customers;
+        private readonly List<Customer> _customers;
         private Customer? _currentCustomer;
         private Account? _currentAccount;
 
@@ -73,7 +73,7 @@ namespace ATM_HM46
 
             var result = _currentAccount.Withdraw(amount);
 
-            return result ? WithdrawResultEnum.Success : WithdrawResultEnum.NotEnoughtMoney;
+            return result ? WithdrawResultEnum.Success : WithdrawResultEnum.NotEnoughMoney;
         }
 
         private bool CheckCurrentAccount()
@@ -81,9 +81,5 @@ namespace ATM_HM46
             return _currentAccount != null;
         }
 
-        private bool CheckCurrentCustomer()
-        {
-            return _currentCustomer != null;
-        }
     }
 }

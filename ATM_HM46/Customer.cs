@@ -5,8 +5,8 @@
         public string Id { get; private set; }
         public string Name { get; private set; }
         public string Surname { get; private set; }
-        private int _pin;
-        private List<Account> _accounts;
+        private readonly int _pin;
+        private readonly List<Account> _accounts;
 
         public Customer(string id, string name, string surname, int pin, List<Account> accounts)
         {
